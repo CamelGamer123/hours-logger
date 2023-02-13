@@ -122,7 +122,54 @@ def checkHours(name):
         print(f"Insufficient hours worked on {tooFewHours}")
 
 
+def addAllHours(name):
+    # Create a function that adds all the hours for a user
+    with open('users.json', 'r') as f:
+        database = json.load(f)
+    totalHours = 0
+    for day in database[name]["days"]:
+        totalHours += database[name]["days"][day]
+    return totalHours
 
+
+def makeHoursDict():
+    # This function creates a dictionary of the total hours for each user
+    with open('users.json', 'r') as f:
+        database = json.load(f)
+    hoursDict = {}
+    for user in database:
+        hoursDict[user] = addAllHours(user)
+    return hoursDict
+
+
+def makeThresholdList():
+    # This function creates a list of users who have worked more than 40 hours, less than 30 hours,
+    # or between 37 and 39 hours
+    with open('users.json', 'r') as f:
+        database = json.load(f)
+    thresholdList = []
+    for user in database:
+        if addAllHours(user) > 40:
+            thresholdList.append(user)
+        elif addAllHours(user) < 30:
+            thresholdList.append(user)
+        elif 37 <= addAllHours(user) <= 39:
+            thresholdList.append(user)
+    return thresholdList
+
+
+def makeFancyDisplay():
+    # This function makes a fancy display of each user's entry
+    with open('users.json', 'r') as f:
+        database = json.load(f)
+    for user in database:
+        print(f"Name: {database[user]['name']}")
+        print(f"Week Number: {database[user]['weeknum']}")
+        print(f"Employee ID: {database[user]['employeeID']}")
+        print("Days:")
+        for day in database[user]['days']:
+            print(f"    {day}: {database[user]['days'][day]}")
+        print()
 
 
 if __name__ == '__main__':
@@ -139,7 +186,8 @@ if __name__ == '__main__':
     while True:
         try:
 
-            command = input('Enter a command: ').lower().split()
+            command = input('Enter a command: ').split()
+            command[0] = command[0].lower()
             if command[0] == 'adduser':
                 week = input("Enter the week number: ")
                 employeeId = input("Enter the employee ID: ")
@@ -160,10 +208,17 @@ if __name__ == '__main__':
 
             elif command[0] == 'removeuser':
                 removeUser(command[1])
+
+            elif command[0] == 'hours':
+                print(makeHoursDict())
+            elif command[0] == 'addallhours':
+                print(addAllHours(command[1]))
             elif command[0] == 'flush':
                 flush()
             elif command[0] == 'listusers':
                 listUsers()
+            elif command[0] == "fancy":
+                makeFancyDisplay()
             elif command[0] == 'dayhours':
                 try:
                     setHoursPerDay(command[1], int(command[2]), command[3])
