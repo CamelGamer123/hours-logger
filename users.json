@@ -1,0 +1,26 @@
+{
+    "Bob": {
+        "days": {
+            "Friday": 6,
+            "Monday": 3,
+            "Thursday": 6,
+            "Tuesday": 11,
+            "Wednesday": 6
+        },
+        "employeeID": "2",
+        "name": "Bob",
+        "weeknum": "1"
+    },
+    "James": {
+        "days": {
+            "Friday": 6,
+            "Monday": 3,
+            "Thursday": 6,
+            "Tuesday": 20,
+            "Wednesday": 6
+        },
+        "employeeID": "25",
+        "name": "James",
+        "weeknum": "1"
+    }
+}
