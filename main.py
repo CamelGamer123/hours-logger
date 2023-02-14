@@ -165,19 +165,17 @@ def makeFancyDisplay():
     with open('users.json', 'r') as f:
         database = json.load(f)
     for user in database:
-        print(f"Name: {database[user]['name']}")
-        print(f"Week Number: {database[user]['weeknum']}")
-        print(f"Employee ID: {database[user]['employeeID']}")
-        print("Days:")
+        print(f"Name: {database[user]['name']}\n"
+              f"Week Number: {database[user]['weeknum']}\n"
+              f"Employee ID: {database[user]['employeeID']}\n"
+              f"Days:")
         for day in database[user]['days']:
             _ = f"    {day}: {database[user]['days'][day]}"
             print(_)
-        print(f"{'*' * (len(_) + 10)}")
-        print(f"Summary for {database[user]['employeeID']}:")
-        # Add a check to see if the user has worked more than 40 hours
+        print(f"{'*' * (len(_) + 10)}\n"
+              f"Total hours worked: {addAllHours(user)}\n")
         checkHours(user)
-        print(f"Total hours worked: {addAllHours(user)}")
-        print()
+        print(f"Total hours worked: {addAllHours(user)}\n")
 
 
 if __name__ == '__main__':
@@ -193,7 +191,6 @@ if __name__ == '__main__':
     # Handle user commands
     while True:
         try:
-
             command = input('Enter a command: ').split()
             command[0] = command[0].lower()
             if command[0] == 'adduser':
