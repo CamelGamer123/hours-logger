@@ -135,10 +135,25 @@ def checkHours(name):
             elif database[name]["days"][day] >= 10:
                 tooManyHours.append(day)
     output = ""
-    if tooManyHours is not []:
-        output += f"Too many hours worked on {''.join(str(tooManyHours) for tooManyHours in tooManyHours)}"
-    if tooFewHours is not []:
-        output += f"Insufficient hours worked on {''.join(str(tooFewHours) for tooFewHours in tooFewHours)}"
+
+    if len(tooManyHours) != 0:
+        output += f"Too many hours worked on "
+        length = len(tooManyHours)
+        for item in tooManyHours:
+            if tooManyHours.index(item) == length - 1:
+                output += f"and {item}\n"
+            else:
+                output += f"{item}, "
+    if len(tooFewHours) != 0:
+        output += f"Insufficient hours worked on "
+        length = len(tooFewHours)
+        for item in tooFewHours:
+            print(tooFewHours.index(item))
+            if tooFewHours.index(item) == length - 1:
+                output += f"and {item}\n"
+            else:
+                output += f"{item}, "
+
     return output
 
 
@@ -221,11 +236,12 @@ def createReport():
                     f"Employee ID: {database[user]['employeeID']}\n"
                     f"Days:\n")
             for day in database[user]['days']:
-                f.write(f"    {day}: {database[user]['days'][day]}")
+                f.write(f"    {day}: {database[user]['days'][day]}\n")
 
-            f.write(f"{'*' * 30}\n")
+            f.write(f"{'*' * 100}\n")
             f.write(f"Total hours worked: {addAllHours(user)}\n")
             f.write(checkHours(user))
+            f.write("\n\n\n")
 
 
 class UserInterface:
