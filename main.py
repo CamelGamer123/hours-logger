@@ -94,8 +94,16 @@ def listUsers():
         print(user, ':', users[user])
 
 
+def checkForUser(name, id):
+    with open('users.json', 'r') as f:
+        users = load(f)
+    if f"{name}#{id}" in users:
+        return users[f"{name}#{id}"]["days"]
+    else:
+        return False
+
+
 def setHoursPerDay(name, id, hours, day):
-    print(f"Setting hours for {name}#{id} on {day} to {hours}")
     if not checkDay(day, simpleDays):  # Check if the day is valid
         raise InvalidDay(day)
     if hours > 24:  # Check if the number of hours is valid
@@ -126,11 +134,12 @@ def checkHours(name):
                 tooFewHours.append(day)
             elif database[name]["days"][day] >= 10:
                 tooManyHours.append(day)
-
+    output = ""
     if tooManyHours is not []:
-        print(f"Too many hours worked on {''.join(str(tooManyHours) for tooManyHours in tooManyHours)}")
+        output += f"Too many hours worked on {''.join(str(tooManyHours) for tooManyHours in tooManyHours)}"
     if tooFewHours is not []:
-        print(f"Insufficient hours worked on {''.join(str(tooFewHours) for tooFewHours in tooFewHours)}")
+        output += f"Insufficient hours worked on {''.join(str(tooFewHours) for tooFewHours in tooFewHours)}"
+    return output
 
 
 def addAllHours(name):
@@ -151,6 +160,18 @@ def makeHoursDict():
     for user in database:
         hoursDict[user] = addAllHours(user)
     return hoursDict
+
+
+def getHoursPerDay(name, id, day):
+    # This function gets the hours worked on a specific day
+    if not checkDay(day, simpleDays):  # Check if the day is valid
+        raise InvalidDay(day)
+    try:
+        with open('users.json', 'r') as f:
+            users = load(f)
+        return users[f"{name}#{id}"]["days"][day]
+    except KeyError:
+        raise UserDoesNotExist(name)
 
 
 def makeThresholdList():
@@ -189,12 +210,30 @@ def makeFancyDisplay():
         print(f"Total hours worked: {addAllHours(user)}\n")
 
 
+def createReport():
+    # This function creates a report of all the users
+    with open('users.json', 'r') as f:
+        database = load(f)
+    with open('report.txt', 'w') as f:
+        for user in database:
+            f.write(f"Name: {database[user]['name']}\n"
+                    f"Week Number: {database[user]['weekNum']}\n"
+                    f"Employee ID: {database[user]['employeeID']}\n"
+                    f"Days:\n")
+            for day in database[user]['days']:
+                f.write(f"    {day}: {database[user]['days'][day]}")
+
+            f.write(f"{'*' * 30}\n")
+            f.write(f"Total hours worked: {addAllHours(user)}\n")
+            f.write(checkHours(user))
+
+
 class UserInterface:
     def __init__(self):
         # Creates the main GUI window
         self.root = tk.Tk()
         self.root.title("Time Tracker")
-        self.root.geometry("300x300")
+        self.root.geometry("")
         self.root.resizable(False, False)
         self.root.configure(bg="white")
 
@@ -211,9 +250,10 @@ class UserInterface:
                                                                                             padx=10, pady=10)
         ttk.Button(self.root, text="Set Hours", command=self.createSetHoursWindow).grid(column=2, row=3,
                                                                                         padx=10, pady=10)
-        ttk.Button(self.root, text="Produce Report", command=self.produceReport).grid(column=1, row=4, padx=10,
+        ttk.Button(self.root, text="Produce Report", command=createReport).grid(column=1, row=4, padx=10,
                                                                                       pady=10)
-        ttk.Button(self.root, text="Clear Database", command=self.confirmFlush).grid(column=1, row=5, padx=10, pady=10)
+        ttk.Button(self.root, text="Clear Database", command=self.confirmFlush).grid(column=0, row=4, padx=10, pady=10)
+
         # Creates future windows
         self.addUserWindow = None
         self.removeUserWindow = None
@@ -227,7 +267,7 @@ class UserInterface:
         # Creates a confirmation window for the flush database function
         self.confirmWindow = tk.Tk()
         self.confirmWindow.title("Confirm")
-        self.confirmWindow.geometry("300x300")
+        self.confirmWindow.geometry("")
         self.confirmWindow.resizable(False, False)
         self.confirmWindow.configure(bg="white")
 
@@ -252,7 +292,7 @@ class UserInterface:
         # Creates the add user window
         self.addUserWindow = tk.Tk()
         self.addUserWindow.title("Add User")
-        self.addUserWindow.geometry("300x600")
+        self.addUserWindow.geometry("")
         self.addUserWindow.resizable(False, False)
         self.addUserWindow.configure(bg="white")
 
@@ -309,12 +349,15 @@ class UserInterface:
         thursdayHours = self.thursdayHours.get()
         fridayHours = self.fridayHours.get()
 
-        addUser(id=employeeId, name=name, weekNum=weekNum)
-        setHoursPerDay(name=name, id=employeeId, day="Monday", hours=int(mondayHours))
-        setHoursPerDay(name=name, id=employeeId, day="Tuesday", hours=int(tuesdayHours))
-        setHoursPerDay(name=name, id=employeeId, day="Wednesday", hours=int(wednesdayHours))
-        setHoursPerDay(name=name, id=employeeId, day="Thursday", hours=int(thursdayHours))
-        setHoursPerDay(name=name, id=employeeId, day="Friday", hours=int(fridayHours))
+        try:
+            addUser(id=int(employeeId), name=name, weekNum=int(weekNum))
+            setHoursPerDay(name=name, id=employeeId, day="Monday", hours=int(mondayHours))
+            setHoursPerDay(name=name, id=employeeId, day="Tuesday", hours=int(tuesdayHours))
+            setHoursPerDay(name=name, id=employeeId, day="Wednesday", hours=int(wednesdayHours))
+            setHoursPerDay(name=name, id=employeeId, day="Thursday", hours=int(thursdayHours))
+            setHoursPerDay(name=name, id=employeeId, day="Friday", hours=int(fridayHours))
+        except ValueError:
+            self.createErrorWindow("Please enter a valid number for the week number and hours")
 
         self.weekNum.set("")
         self.employeeId.set("")
@@ -325,43 +368,166 @@ class UserInterface:
         self.thursdayHours.set("")
         self.fridayHours.set("")
 
+    def createErrorWindow(self, message):
+        # Creates the error window
+        self.errorWindow = tk.Tk()
+        self.errorWindow.title("Error")
+        self.errorWindow.geometry("")
+        self.errorWindow.resizable(False, False)
+        self.errorWindow.configure(bg="white")
+
+        # Adds the error window to the list of windows
+        self.windows.append(self.errorWindow)
+
+        # Adds all buttons and text boxes and labels
+        ttk.Label(self.errorWindow, text=message).grid(column=0, row=0, padx=10, pady=10)
+        ttk.Button(self.errorWindow, text="OK", command=self.errorWindow.destroy).grid(column=0, row=1, padx=10,
+                                                                                       pady=10)
+
+        # Runs the error window
+        self.errorWindow.mainloop()
+
+    def removeUserButtonCommand(self):
+        employeeId = self.removeEmployeeId.get()
+        name = self.removeName.get()
+
+        try:
+            removeUser(id=int(employeeId), name=name)
+            self.removeUserWindow.destroy()
+        except ValueError:
+            self.createErrorWindow("Please enter a valid number for the employee ID")
+        except KeyError:
+            self.createErrorWindow("User not found")
+
+        self.removeEmployeeId.set("")
+        self.removeName.set("")
+
     def createRemoveUserWindow(self):
         # Creates the remove user window
         self.removeUserWindow = tk.Tk()
         self.removeUserWindow.title("Remove User")
-        self.removeUserWindow.geometry("300x300")
+        self.removeUserWindow.geometry("")
         self.removeUserWindow.resizable(False, False)
         self.removeUserWindow.configure(bg="white")
 
         # Adds the remove user window to the list of windows
         self.windows.append(self.removeUserWindow)
 
+        self.removeEmployeeId = tk.StringVar(self.removeUserWindow)
+        self.removeName = tk.StringVar(self.removeUserWindow)
         # Adds all buttons and text boxes and labels
+        ttk.Label(self.removeUserWindow, text="Employee ID").grid(column=0, row=0, padx=10, pady=10)
+        ttk.Entry(self.removeUserWindow, textvariable=self.removeEmployeeId).grid(column=1, row=0, padx=10, pady=10)
+
+        ttk.Label(self.removeUserWindow, text="Name").grid(column=0, row=1, padx=10, pady=10)
+        ttk.Entry(self.removeUserWindow, textvariable=self.removeName).grid(column=1, row=1, padx=10, pady=10)
+
+        ttk.Button(self.removeUserWindow, text="Confirm", command=self.removeUserButtonCommand).grid(column=0, row=2,
+                                                                                                     padx=10, pady=10)
 
         # Runs the remove user window
         self.removeUserWindow.mainloop()
+
+    def setHoursButtonCommand(self):
+        employeeId = self.setHoursEmployeeId.get()
+        name = self.setHoursName.get()
+        mondayHours = self.setHoursMondayHours.get()
+        tuesdayHours = self.setHoursTuesdayHours.get()
+        wednesdayHours = self.setHoursWednesdayHours.get()
+        thursdayHours = self.setHoursThursdayHours.get()
+        fridayHours = self.setHoursFridayHours.get()
+
+        try:
+            setHoursPerDay(name=name, id=employeeId, day="Monday", hours=int(mondayHours))
+            setHoursPerDay(name=name, id=employeeId, day="Tuesday", hours=int(tuesdayHours))
+            setHoursPerDay(name=name, id=employeeId, day="Wednesday", hours=int(wednesdayHours))
+            setHoursPerDay(name=name, id=employeeId, day="Thursday", hours=int(thursdayHours))
+            setHoursPerDay(name=name, id=employeeId, day="Friday", hours=int(fridayHours))
+        except ValueError:
+            self.createErrorWindow("Please enter a valid number for the hours")
+
+        self.setHoursEmployeeId.set("")
+        self.setHoursName.set("")
+        self.setHoursMondayHours.set("")
+        self.setHoursTuesdayHours.set("")
+        self.setHoursWednesdayHours.set("")
+        self.setHoursThursdayHours.set("")
+        self.setHoursFridayHours.set("")
+
+    def findEmployee(self):
+        employeeId = self.setHoursEmployeeId.get()
+        name = self.setHoursName.get()
+
+        self.setHoursMondayHours = tk.StringVar(self.setHoursWindow)
+        self.setHoursTuesdayHours = tk.StringVar(self.setHoursWindow)
+        self.setHoursWednesdayHours = tk.StringVar(self.setHoursWindow)
+        self.setHoursThursdayHours = tk.StringVar(self.setHoursWindow)
+        self.setHoursFridayHours = tk.StringVar(self.setHoursWindow)
+
+        # This function checks if the employee is present in the database, and if they are it creates the set hours
+        # display for each hour with their hours already filled in
+        result = checkForUser(id=int(employeeId), name=name)
+
+        if result is False:
+            self.createErrorWindow("User not found")
+        else:
+            self.setHoursMondayHours.set(getHoursPerDay(name=name, id=employeeId, day="Monday"))
+            self.setHoursTuesdayHours.set(getHoursPerDay(name=name, id=employeeId, day="Tuesday"))
+            self.setHoursWednesdayHours.set(getHoursPerDay(name=name, id=employeeId, day="Wednesday"))
+            self.setHoursThursdayHours.set(getHoursPerDay(name=name, id=employeeId, day="Thursday"))
+            self.setHoursFridayHours.set(getHoursPerDay(name=name, id=employeeId, day="Friday"))
+
+            ttk.Label(self.setHoursWindow, text="Monday").grid(column=0, row=3, padx=10, pady=10)
+            ttk.Entry(self.setHoursWindow, textvariable=self.setHoursMondayHours).grid(column=1, row=3, padx=10,
+                                                                                       pady=10)
+
+            ttk.Label(self.setHoursWindow, text="Tuesday").grid(column=0, row=4, padx=10, pady=10)
+            ttk.Entry(self.setHoursWindow, textvariable=self.setHoursTuesdayHours).grid(column=1, row=4, padx=10,
+                                                                                        pady=10)
+
+            ttk.Label(self.setHoursWindow, text="Wednesday").grid(column=0, row=5, padx=10, pady=10)
+            ttk.Entry(self.setHoursWindow, textvariable=self.setHoursWednesdayHours).grid(column=1, row=5, padx=10,
+                                                                                          pady=10)
+
+            ttk.Label(self.setHoursWindow, text="Thursday").grid(column=0, row=6, padx=10, pady=10)
+            ttk.Entry(self.setHoursWindow, textvariable=self.setHoursThursdayHours).grid(column=1, row=6, padx=10,
+                                                                                         pady=10)
+
+            ttk.Label(self.setHoursWindow, text="Friday").grid(column=0, row=7, padx=10, pady=10)
+            ttk.Entry(self.setHoursWindow, textvariable=self.setHoursFridayHours).grid(column=1, row=7, padx=10,
+                                                                                       pady=10)
+
+            ttk.Button(self.setHoursWindow, text="Confirm", command=self.setHoursButtonCommand).grid(column=0, row=8,
+                                                                                                     padx=10, pady=10)
 
     def createSetHoursWindow(self):
         # Creates the set hours window
         self.setHoursWindow = tk.Tk()
         self.setHoursWindow.title("Set Hours")
-        self.setHoursWindow.geometry("300x300")
+        self.setHoursWindow.geometry("")
         self.setHoursWindow.resizable(False, False)
         self.setHoursWindow.configure(bg="white")
 
         # Adds the set hours window to the list of windows
         self.windows.append(self.setHoursWindow)
 
+        self.setHoursEmployeeId = tk.StringVar(self.setHoursWindow)
+        self.setHoursName = tk.StringVar(self.setHoursWindow)
+
         # Adds all buttons and text boxes and labels
+        ttk.Label(self.setHoursWindow, text="Employee ID").grid(column=0, row=0, padx=10, pady=10)
+        ttk.Entry(self.setHoursWindow, textvariable=self.setHoursEmployeeId).grid(column=1, row=0, padx=10, pady=10)
+
+        ttk.Label(self.setHoursWindow, text="Name").grid(column=0, row=1, padx=10, pady=10)
+        ttk.Entry(self.setHoursWindow, textvariable=self.setHoursName).grid(column=1, row=1, padx=10, pady=10)
+
+        ttk.Button(self.setHoursWindow, text="Find Employee", command=self.findEmployee).grid(column=0, row=2,
+                                                                                              padx=10, pady=10)
+
+        # The hours display is not created here because it is created in the findEmployee function when the employee is found
 
         # Runs the set hours window
         self.setHoursWindow.mainloop()
-
-    def produceReport(self):
-        # This function should produce a report of all the users and their hours the same way that createFancyDisplay
-        # does and write it to a text file called report.txt in the same directory as the program. It should also
-        # open a notepad window with the report in it.
-        pass
 
     def close(self):
         for window in self.windows:
