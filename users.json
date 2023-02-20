@@ -1,1 +1,14 @@
-{}
+{
+    "Bob#1": {
+        "days": {
+            "Friday": 1,
+            "Monday": 6,
+            "Thursday": 2,
+            "Tuesday": 5,
+            "Wednesday": 4
+        },
+        "employeeID": 1,
+        "name": "Bob",
+        "weekNum": 5
+    }
+}
