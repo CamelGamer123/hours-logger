@@ -1,6 +1,6 @@
 from json import load, dump
-import tkinter as tk
-from tkinter import ttk
+from tkinter import Tk, StringVar
+from tkinter.ttk import Label, Button, Entry
 
 # Constants
 DAYS = [['monday', 'mon'], ['tuesday', 'tue'], ['wednesday', 'wed'], ['thursday', 'thu'], ['friday', 'fri']]
@@ -247,7 +247,7 @@ def createReport():
 class UserInterface:
     def __init__(self):
         # Creates the main GUI window
-        self.root = tk.Tk()
+        self.root = Tk()
         self.root.title("Time Tracker")
         self.root.geometry("")
         self.root.resizable(False, False)
@@ -258,17 +258,17 @@ class UserInterface:
 
         # Creates all UI elements
 
-        ttk.Label(self.root, text="Please select an option below:").grid(column=0, row=1, columnspan=3, padx=10,
+        Label(self.root, text="Please select an option below:").grid(column=0, row=1, columnspan=3, padx=10,
                                                                          pady=10)
-        ttk.Button(self.root, text="Add User", command=self.createAddUserWindow).grid(column=0, row=3, padx=10,
+        Button(self.root, text="Add User", command=self.createAddUserWindow).grid(column=0, row=3, padx=10,
                                                                                       pady=10)
-        ttk.Button(self.root, text="Remove User", command=self.createRemoveUserWindow).grid(column=1, row=3,
+        Button(self.root, text="Remove User", command=self.createRemoveUserWindow).grid(column=1, row=3,
                                                                                             padx=10, pady=10)
-        ttk.Button(self.root, text="Set Hours", command=self.createSetHoursWindow).grid(column=2, row=3,
+        Button(self.root, text="Set Hours", command=self.createSetHoursWindow).grid(column=2, row=3,
                                                                                         padx=10, pady=10)
-        ttk.Button(self.root, text="Produce Report", command=createReport).grid(column=1, row=4, padx=10,
+        Button(self.root, text="Produce Report", command=createReport).grid(column=1, row=4, padx=10,
                                                                                       pady=10)
-        ttk.Button(self.root, text="Clear Database", command=self.confirmFlush).grid(column=0, row=4, padx=10, pady=10)
+        Button(self.root, text="Clear Database", command=self.confirmFlush).grid(column=0, row=4, padx=10, pady=10)
 
         # Creates future windows
         self.addUserWindow = None
@@ -281,7 +281,7 @@ class UserInterface:
 
     def confirmFlush(self):
         # Creates a confirmation window for the flush database function
-        self.confirmWindow = tk.Tk()
+        self.confirmWindow = Tk()
         self.confirmWindow.title("Confirm")
         self.confirmWindow.geometry("")
         self.confirmWindow.resizable(False, False)
@@ -290,13 +290,13 @@ class UserInterface:
         # Adds the confirmation window to the list of windows
         self.windows.append(self.confirmWindow)
 
-        ttk.Label(
+        Label(
             self.confirmWindow,
             text="Are you sure you want to clear the database?"
         ).grid(column=0, row=1, columnspan=3, padx=10, pady=10)
 
-        ttk.Button(self.confirmWindow, text="Yes", command=self.flushAll).grid(column=0, row=3, padx=10, pady=10)
-        ttk.Button(self.confirmWindow, text="No", command=self.confirmWindow.destroy).grid(column=1, row=3, padx=10,
+        Button(self.confirmWindow, text="Yes", command=self.flushAll).grid(column=0, row=3, padx=10, pady=10)
+        Button(self.confirmWindow, text="No", command=self.confirmWindow.destroy).grid(column=1, row=3, padx=10,
                                                                                            pady=10)
 
     def flushAll(self):
@@ -306,7 +306,7 @@ class UserInterface:
 
     def createAddUserWindow(self):
         # Creates the add user window
-        self.addUserWindow = tk.Tk()
+        self.addUserWindow = Tk()
         self.addUserWindow.title("Add User")
         self.addUserWindow.geometry("")
         self.addUserWindow.resizable(False, False)
@@ -315,41 +315,41 @@ class UserInterface:
         # Adds the add user window to the list of windows
         self.windows.append(self.addUserWindow)
 
-        self.employeeId = tk.StringVar(self.addUserWindow)
-        self.name = tk.StringVar(self.addUserWindow)
-        self.weekNum = tk.StringVar(self.addUserWindow)
-        self.mondayHours = tk.StringVar(self.addUserWindow)
-        self.tuesdayHours = tk.StringVar(self.addUserWindow)
-        self.wednesdayHours = tk.StringVar(self.addUserWindow)
-        self.thursdayHours = tk.StringVar(self.addUserWindow)
-        self.fridayHours = tk.StringVar(self.addUserWindow)
+        self.employeeId = StringVar(self.addUserWindow)
+        self.name = StringVar(self.addUserWindow)
+        self.weekNum = StringVar(self.addUserWindow)
+        self.mondayHours = StringVar(self.addUserWindow)
+        self.tuesdayHours = StringVar(self.addUserWindow)
+        self.wednesdayHours = StringVar(self.addUserWindow)
+        self.thursdayHours = StringVar(self.addUserWindow)
+        self.fridayHours = StringVar(self.addUserWindow)
 
         # Adds all buttons and text boxes and labels
-        ttk.Label(self.addUserWindow, text="Employee ID").grid(column=0, row=0, padx=10, pady=10)
-        ttk.Entry(self.addUserWindow, textvariable=self.employeeId).grid(column=1, row=0, padx=10, pady=10)
+        Label(self.addUserWindow, text="Employee ID").grid(column=0, row=0, padx=10, pady=10)
+        Entry(self.addUserWindow, textvariable=self.employeeId).grid(column=1, row=0, padx=10, pady=10)
 
-        ttk.Label(self.addUserWindow, text="Name").grid(column=0, row=1, padx=10, pady=10)
-        ttk.Entry(self.addUserWindow, textvariable=self.name).grid(column=1, row=1, padx=10, pady=10)
+        Label(self.addUserWindow, text="Name").grid(column=0, row=1, padx=10, pady=10)
+        Entry(self.addUserWindow, textvariable=self.name).grid(column=1, row=1, padx=10, pady=10)
 
-        ttk.Label(self.addUserWindow, text="Week Number").grid(column=0, row=2, padx=10, pady=10)
-        ttk.Entry(self.addUserWindow, textvariable=self.weekNum).grid(column=1, row=2, padx=10, pady=10)
+        Label(self.addUserWindow, text="Week Number").grid(column=0, row=2, padx=10, pady=10)
+        Entry(self.addUserWindow, textvariable=self.weekNum).grid(column=1, row=2, padx=10, pady=10)
 
-        ttk.Label(self.addUserWindow, text="Monday").grid(column=0, row=3, padx=10, pady=10)
-        ttk.Entry(self.addUserWindow, textvariable=self.mondayHours).grid(column=1, row=3, padx=10, pady=10)
+        Label(self.addUserWindow, text="Monday").grid(column=0, row=3, padx=10, pady=10)
+        Entry(self.addUserWindow, textvariable=self.mondayHours).grid(column=1, row=3, padx=10, pady=10)
 
-        ttk.Label(self.addUserWindow, text="Tuesday").grid(column=0, row=4, padx=10, pady=10)
-        ttk.Entry(self.addUserWindow, textvariable=self.tuesdayHours).grid(column=1, row=4, padx=10, pady=10)
+        Label(self.addUserWindow, text="Tuesday").grid(column=0, row=4, padx=10, pady=10)
+        Entry(self.addUserWindow, textvariable=self.tuesdayHours).grid(column=1, row=4, padx=10, pady=10)
 
-        ttk.Label(self.addUserWindow, text="Wednesday").grid(column=0, row=5, padx=10, pady=10)
-        ttk.Entry(self.addUserWindow, textvariable=self.wednesdayHours).grid(column=1, row=5, padx=10, pady=10)
+        Label(self.addUserWindow, text="Wednesday").grid(column=0, row=5, padx=10, pady=10)
+        Entry(self.addUserWindow, textvariable=self.wednesdayHours).grid(column=1, row=5, padx=10, pady=10)
 
-        ttk.Label(self.addUserWindow, text="Thursday").grid(column=0, row=6, padx=10, pady=10)
-        ttk.Entry(self.addUserWindow, textvariable=self.thursdayHours).grid(column=1, row=6, padx=10, pady=10)
+        Label(self.addUserWindow, text="Thursday").grid(column=0, row=6, padx=10, pady=10)
+        Entry(self.addUserWindow, textvariable=self.thursdayHours).grid(column=1, row=6, padx=10, pady=10)
 
-        ttk.Label(self.addUserWindow, text="Friday").grid(column=0, row=7, padx=10, pady=10)
-        ttk.Entry(self.addUserWindow, textvariable=self.fridayHours).grid(column=1, row=7, padx=10, pady=10)
+        Label(self.addUserWindow, text="Friday").grid(column=0, row=7, padx=10, pady=10)
+        Entry(self.addUserWindow, textvariable=self.fridayHours).grid(column=1, row=7, padx=10, pady=10)
 
-        ttk.Button(self.addUserWindow, text="Confirm", command=self.addUserButtonCommand).grid(column=0, row=8, padx=10,
+        Button(self.addUserWindow, text="Confirm", command=self.addUserButtonCommand).grid(column=0, row=8, padx=10,
                                                                                                pady=10)
 
         # Runs the add user window
@@ -386,7 +386,7 @@ class UserInterface:
 
     def createErrorWindow(self, message):
         # Creates the error window
-        self.errorWindow = tk.Tk()
+        self.errorWindow = Tk()
         self.errorWindow.title("Error")
         self.errorWindow.geometry("")
         self.errorWindow.resizable(False, False)
@@ -396,8 +396,8 @@ class UserInterface:
         self.windows.append(self.errorWindow)
 
         # Adds all buttons and text boxes and labels
-        ttk.Label(self.errorWindow, text=message).grid(column=0, row=0, padx=10, pady=10)
-        ttk.Button(self.errorWindow, text="OK", command=self.errorWindow.destroy).grid(column=0, row=1, padx=10,
+        Label(self.errorWindow, text=message).grid(column=0, row=0, padx=10, pady=10)
+        Button(self.errorWindow, text="OK", command=self.errorWindow.destroy).grid(column=0, row=1, padx=10,
                                                                                        pady=10)
 
         # Runs the error window
@@ -420,7 +420,7 @@ class UserInterface:
 
     def createRemoveUserWindow(self):
         # Creates the remove user window
-        self.removeUserWindow = tk.Tk()
+        self.removeUserWindow = Tk()
         self.removeUserWindow.title("Remove User")
         self.removeUserWindow.geometry("")
         self.removeUserWindow.resizable(False, False)
@@ -429,16 +429,16 @@ class UserInterface:
         # Adds the remove user window to the list of windows
         self.windows.append(self.removeUserWindow)
 
-        self.removeEmployeeId = tk.StringVar(self.removeUserWindow)
-        self.removeName = tk.StringVar(self.removeUserWindow)
+        self.removeEmployeeId = StringVar(self.removeUserWindow)
+        self.removeName = StringVar(self.removeUserWindow)
         # Adds all buttons and text boxes and labels
-        ttk.Label(self.removeUserWindow, text="Employee ID").grid(column=0, row=0, padx=10, pady=10)
-        ttk.Entry(self.removeUserWindow, textvariable=self.removeEmployeeId).grid(column=1, row=0, padx=10, pady=10)
+        Label(self.removeUserWindow, text="Employee ID").grid(column=0, row=0, padx=10, pady=10)
+        Entry(self.removeUserWindow, textvariable=self.removeEmployeeId).grid(column=1, row=0, padx=10, pady=10)
 
-        ttk.Label(self.removeUserWindow, text="Name").grid(column=0, row=1, padx=10, pady=10)
-        ttk.Entry(self.removeUserWindow, textvariable=self.removeName).grid(column=1, row=1, padx=10, pady=10)
+        Label(self.removeUserWindow, text="Name").grid(column=0, row=1, padx=10, pady=10)
+        Entry(self.removeUserWindow, textvariable=self.removeName).grid(column=1, row=1, padx=10, pady=10)
 
-        ttk.Button(self.removeUserWindow, text="Confirm", command=self.removeUserButtonCommand).grid(column=0, row=2,
+        Button(self.removeUserWindow, text="Confirm", command=self.removeUserButtonCommand).grid(column=0, row=2,
                                                                                                      padx=10, pady=10)
 
         # Runs the remove user window
@@ -474,11 +474,11 @@ class UserInterface:
         employeeId = self.setHoursEmployeeId.get()
         name = self.setHoursName.get()
 
-        self.setHoursMondayHours = tk.StringVar(self.setHoursWindow)
-        self.setHoursTuesdayHours = tk.StringVar(self.setHoursWindow)
-        self.setHoursWednesdayHours = tk.StringVar(self.setHoursWindow)
-        self.setHoursThursdayHours = tk.StringVar(self.setHoursWindow)
-        self.setHoursFridayHours = tk.StringVar(self.setHoursWindow)
+        self.setHoursMondayHours = StringVar(self.setHoursWindow)
+        self.setHoursTuesdayHours = StringVar(self.setHoursWindow)
+        self.setHoursWednesdayHours = StringVar(self.setHoursWindow)
+        self.setHoursThursdayHours = StringVar(self.setHoursWindow)
+        self.setHoursFridayHours = StringVar(self.setHoursWindow)
 
         # This function checks if the employee is present in the database, and if they are it creates the set hours
         # display for each hour with their hours already filled in
@@ -493,32 +493,32 @@ class UserInterface:
             self.setHoursThursdayHours.set(getHoursPerDay(name=name, id=employeeId, day="Thursday"))
             self.setHoursFridayHours.set(getHoursPerDay(name=name, id=employeeId, day="Friday"))
 
-            ttk.Label(self.setHoursWindow, text="Monday").grid(column=0, row=3, padx=10, pady=10)
-            ttk.Entry(self.setHoursWindow, textvariable=self.setHoursMondayHours).grid(column=1, row=3, padx=10,
+            Label(self.setHoursWindow, text="Monday").grid(column=0, row=3, padx=10, pady=10)
+            Entry(self.setHoursWindow, textvariable=self.setHoursMondayHours).grid(column=1, row=3, padx=10,
                                                                                        pady=10)
 
-            ttk.Label(self.setHoursWindow, text="Tuesday").grid(column=0, row=4, padx=10, pady=10)
-            ttk.Entry(self.setHoursWindow, textvariable=self.setHoursTuesdayHours).grid(column=1, row=4, padx=10,
+            Label(self.setHoursWindow, text="Tuesday").grid(column=0, row=4, padx=10, pady=10)
+            Entry(self.setHoursWindow, textvariable=self.setHoursTuesdayHours).grid(column=1, row=4, padx=10,
                                                                                         pady=10)
 
-            ttk.Label(self.setHoursWindow, text="Wednesday").grid(column=0, row=5, padx=10, pady=10)
-            ttk.Entry(self.setHoursWindow, textvariable=self.setHoursWednesdayHours).grid(column=1, row=5, padx=10,
+            Label(self.setHoursWindow, text="Wednesday").grid(column=0, row=5, padx=10, pady=10)
+            Entry(self.setHoursWindow, textvariable=self.setHoursWednesdayHours).grid(column=1, row=5, padx=10,
                                                                                           pady=10)
 
-            ttk.Label(self.setHoursWindow, text="Thursday").grid(column=0, row=6, padx=10, pady=10)
-            ttk.Entry(self.setHoursWindow, textvariable=self.setHoursThursdayHours).grid(column=1, row=6, padx=10,
+            Label(self.setHoursWindow, text="Thursday").grid(column=0, row=6, padx=10, pady=10)
+            Entry(self.setHoursWindow, textvariable=self.setHoursThursdayHours).grid(column=1, row=6, padx=10,
                                                                                          pady=10)
 
-            ttk.Label(self.setHoursWindow, text="Friday").grid(column=0, row=7, padx=10, pady=10)
-            ttk.Entry(self.setHoursWindow, textvariable=self.setHoursFridayHours).grid(column=1, row=7, padx=10,
+            Label(self.setHoursWindow, text="Friday").grid(column=0, row=7, padx=10, pady=10)
+            Entry(self.setHoursWindow, textvariable=self.setHoursFridayHours).grid(column=1, row=7, padx=10,
                                                                                        pady=10)
 
-            ttk.Button(self.setHoursWindow, text="Confirm", command=self.setHoursButtonCommand).grid(column=0, row=8,
+            Button(self.setHoursWindow, text="Confirm", command=self.setHoursButtonCommand).grid(column=0, row=8,
                                                                                                      padx=10, pady=10)
 
     def createSetHoursWindow(self):
         # Creates the set hours window
-        self.setHoursWindow = tk.Tk()
+        self.setHoursWindow = Tk()
         self.setHoursWindow.title("Set Hours")
         self.setHoursWindow.geometry("")
         self.setHoursWindow.resizable(False, False)
@@ -527,17 +527,17 @@ class UserInterface:
         # Adds the set hours window to the list of windows
         self.windows.append(self.setHoursWindow)
 
-        self.setHoursEmployeeId = tk.StringVar(self.setHoursWindow)
-        self.setHoursName = tk.StringVar(self.setHoursWindow)
+        self.setHoursEmployeeId = StringVar(self.setHoursWindow)
+        self.setHoursName = StringVar(self.setHoursWindow)
 
         # Adds all buttons and text boxes and labels
-        ttk.Label(self.setHoursWindow, text="Employee ID").grid(column=0, row=0, padx=10, pady=10)
-        ttk.Entry(self.setHoursWindow, textvariable=self.setHoursEmployeeId).grid(column=1, row=0, padx=10, pady=10)
+        Label(self.setHoursWindow, text="Employee ID").grid(column=0, row=0, padx=10, pady=10)
+        Entry(self.setHoursWindow, textvariable=self.setHoursEmployeeId).grid(column=1, row=0, padx=10, pady=10)
 
-        ttk.Label(self.setHoursWindow, text="Name").grid(column=0, row=1, padx=10, pady=10)
-        ttk.Entry(self.setHoursWindow, textvariable=self.setHoursName).grid(column=1, row=1, padx=10, pady=10)
+        Label(self.setHoursWindow, text="Name").grid(column=0, row=1, padx=10, pady=10)
+        Entry(self.setHoursWindow, textvariable=self.setHoursName).grid(column=1, row=1, padx=10, pady=10)
 
-        ttk.Button(self.setHoursWindow, text="Find Employee", command=self.findEmployee).grid(column=0, row=2,
+        Button(self.setHoursWindow, text="Find Employee", command=self.findEmployee).grid(column=0, row=2,
                                                                                               padx=10, pady=10)
 
         # The hours display is not created here because it is created in the findEmployee function when the employee is found
