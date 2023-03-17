@@ -1,0 +1,15 @@
+Name: Bob
+Week Number: 1
+Employee ID: 1
+Days:
+    Friday: 1
+    Monday: 1
+    Thursday: 1
+    Tuesday: 1
+    Wednesday: 1
+****************************************************************************************************
+Total hours worked: 5
+Insufficient hours worked on Friday, Monday, Thursday, Tuesday, and Wednesday
+
+
+

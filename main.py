@@ -50,6 +50,11 @@ class MissingID(DatabaseError):
         self.message = message
 
 
+class UserAlreadyExists(DatabaseError):
+    def __init__(self, message=None):
+        self.message = message
+
+
 class MissingParamaters(Exception):
     def __init__(self, message=None):
         self.message = message
@@ -65,9 +70,12 @@ def checkDay(day, days):
 def addUser(id, name, weekNum):
     with open('users.json', 'r') as f:
         users = load(f)
-    users[f"{name}#{id}"] = {"weekNum": weekNum, "employeeID": id, "name": name, "days": {}}
-    with open('users.json', 'w') as f:
-        dump(users, f, sort_keys=True, indent=4)
+    if users[f"{name}#{id}"] is not None:
+        raise UserAlreadyExists
+    else:
+        users[f"{name}#{id}"] = {"weekNum": weekNum, "employeeID": id, "name": name, "days": {}}
+        with open('users.json', 'w') as f:
+            dump(users, f, sort_keys=True, indent=4)
 
 
 def removeUser(name, id):
@@ -148,7 +156,6 @@ def checkHours(name):
         output += f"Insufficient hours worked on "
         length = len(tooFewHours)
         for item in tooFewHours:
-            print(tooFewHours.index(item))
             if tooFewHours.index(item) == length - 1:
                 output += f"and {item}\n"
             else:
@@ -207,24 +214,6 @@ def makeThresholdList():
     return maxList, minList, otherList
 
 
-def makeFancyDisplay():
-    # This function makes a fancy display of each user's entry
-    with open('users.json', 'r') as f:
-        database = load(f)
-    for user in database:
-        print(f"Name: {database[user]['name']}\n"
-              f"Week Number: {database[user]['weeknum']}\n"
-              f"Employee ID: {database[user]['employeeID']}\n"
-              f"Days:")
-        for day in database[user]['days']:
-            _ = f"    {day}: {database[user]['days'][day]}"
-            print(_)
-        print(f"{'*' * (len(_) + 10)}\n"
-              f"Total hours worked: {addAllHours(user)}\n")
-        checkHours(user)
-        print(f"Total hours worked: {addAllHours(user)}\n")
-
-
 def createReport():
     # This function creates a report of all the users
     with open('users.json', 'r') as f:
@@ -245,6 +234,10 @@ def createReport():
 
 
 class UserInterface:
+    """
+    This class creates the main GUI window and all the other windows.
+    """
+
     def __init__(self):
         # Creates the main GUI window
         self.root = Tk()
@@ -257,17 +250,16 @@ class UserInterface:
         self.windows = [self.root]
 
         # Creates all UI elements
-
         Label(self.root, text="Please select an option below:").grid(column=0, row=1, columnspan=3, padx=10,
-                                                                         pady=10)
+                                                                     pady=10)
         Button(self.root, text="Add User", command=self.createAddUserWindow).grid(column=0, row=3, padx=10,
-                                                                                      pady=10)
+                                                                                  pady=10)
         Button(self.root, text="Remove User", command=self.createRemoveUserWindow).grid(column=1, row=3,
-                                                                                            padx=10, pady=10)
-        Button(self.root, text="Set Hours", command=self.createSetHoursWindow).grid(column=2, row=3,
                                                                                         padx=10, pady=10)
-        Button(self.root, text="Produce Report", command=createReport).grid(column=1, row=4, padx=10,
-                                                                                      pady=10)
+        Button(self.root, text="Set Hours", command=self.createSetHoursWindow).grid(column=2, row=3,
+                                                                                    padx=10, pady=10)
+        Button(self.root, text="Produce Report", command=self.produceReport).grid(column=1, row=4, padx=10,
+                                                                                  pady=10)
         Button(self.root, text="Clear Database", command=self.confirmFlush).grid(column=0, row=4, padx=10, pady=10)
 
         # Creates future windows
@@ -278,6 +270,12 @@ class UserInterface:
 
         # Runs the main menu
         self.root.mainloop()
+
+    def produceReport(self):
+        createReport()
+        self.createErrorWindow("Report created successfully.")
+        with open('report.txt', 'r') as f:
+            print(f.read())
 
     def confirmFlush(self):
         # Creates a confirmation window for the flush database function
@@ -297,7 +295,7 @@ class UserInterface:
 
         Button(self.confirmWindow, text="Yes", command=self.flushAll).grid(column=0, row=3, padx=10, pady=10)
         Button(self.confirmWindow, text="No", command=self.confirmWindow.destroy).grid(column=1, row=3, padx=10,
-                                                                                           pady=10)
+                                                                                       pady=10)
 
     def flushAll(self):
         flush()
@@ -350,7 +348,7 @@ class UserInterface:
         Entry(self.addUserWindow, textvariable=self.fridayHours).grid(column=1, row=7, padx=10, pady=10)
 
         Button(self.addUserWindow, text="Confirm", command=self.addUserButtonCommand).grid(column=0, row=8, padx=10,
-                                                                                               pady=10)
+                                                                                           pady=10)
 
         # Runs the add user window
         self.addUserWindow.mainloop()
@@ -374,6 +372,8 @@ class UserInterface:
             setHoursPerDay(name=name, id=employeeId, day="Friday", hours=int(fridayHours))
         except ValueError:
             self.createErrorWindow("Please enter a valid number for the week number and hours")
+        except UserAlreadyExists:
+            self.createErrorWindow("User already exists")
 
         self.weekNum.set("")
         self.employeeId.set("")
@@ -398,7 +398,7 @@ class UserInterface:
         # Adds all buttons and text boxes and labels
         Label(self.errorWindow, text=message).grid(column=0, row=0, padx=10, pady=10)
         Button(self.errorWindow, text="OK", command=self.errorWindow.destroy).grid(column=0, row=1, padx=10,
-                                                                                       pady=10)
+                                                                                   pady=10)
 
         # Runs the error window
         self.errorWindow.mainloop()
@@ -439,7 +439,7 @@ class UserInterface:
         Entry(self.removeUserWindow, textvariable=self.removeName).grid(column=1, row=1, padx=10, pady=10)
 
         Button(self.removeUserWindow, text="Confirm", command=self.removeUserButtonCommand).grid(column=0, row=2,
-                                                                                                     padx=10, pady=10)
+                                                                                                 padx=10, pady=10)
 
         # Runs the remove user window
         self.removeUserWindow.mainloop()
@@ -495,26 +495,26 @@ class UserInterface:
 
             Label(self.setHoursWindow, text="Monday").grid(column=0, row=3, padx=10, pady=10)
             Entry(self.setHoursWindow, textvariable=self.setHoursMondayHours).grid(column=1, row=3, padx=10,
-                                                                                       pady=10)
+                                                                                   pady=10)
 
             Label(self.setHoursWindow, text="Tuesday").grid(column=0, row=4, padx=10, pady=10)
             Entry(self.setHoursWindow, textvariable=self.setHoursTuesdayHours).grid(column=1, row=4, padx=10,
-                                                                                        pady=10)
+                                                                                    pady=10)
 
             Label(self.setHoursWindow, text="Wednesday").grid(column=0, row=5, padx=10, pady=10)
             Entry(self.setHoursWindow, textvariable=self.setHoursWednesdayHours).grid(column=1, row=5, padx=10,
-                                                                                          pady=10)
+                                                                                      pady=10)
 
             Label(self.setHoursWindow, text="Thursday").grid(column=0, row=6, padx=10, pady=10)
             Entry(self.setHoursWindow, textvariable=self.setHoursThursdayHours).grid(column=1, row=6, padx=10,
-                                                                                         pady=10)
+                                                                                     pady=10)
 
             Label(self.setHoursWindow, text="Friday").grid(column=0, row=7, padx=10, pady=10)
             Entry(self.setHoursWindow, textvariable=self.setHoursFridayHours).grid(column=1, row=7, padx=10,
-                                                                                       pady=10)
+                                                                                   pady=10)
 
             Button(self.setHoursWindow, text="Confirm", command=self.setHoursButtonCommand).grid(column=0, row=8,
-                                                                                                     padx=10, pady=10)
+                                                                                                 padx=10, pady=10)
 
     def createSetHoursWindow(self):
         # Creates the set hours window
@@ -538,7 +538,7 @@ class UserInterface:
         Entry(self.setHoursWindow, textvariable=self.setHoursName).grid(column=1, row=1, padx=10, pady=10)
 
         Button(self.setHoursWindow, text="Find Employee", command=self.findEmployee).grid(column=0, row=2,
-                                                                                              padx=10, pady=10)
+                                                                                          padx=10, pady=10)
 
         # The hours display is not created here because it is created in the findEmployee function when the employee is found
 
@@ -548,7 +548,7 @@ class UserInterface:
     def close(self):
         for window in self.windows:
             window.destroy()
-        exit(0)
+        exit("User closed the program")
 
 
 if __name__ == '__main__':
@@ -556,9 +556,11 @@ if __name__ == '__main__':
     try:
         with open('users.json', 'r') as f:
             pass
+
     # If the file does not exist create it
     except FileNotFoundError:
         with open('users.json', 'w') as f:
             dump({}, f, sort_keys=True, indent=4)
 
+    print("Starting program...")
     gui = UserInterface()
